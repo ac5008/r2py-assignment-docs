@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bouncy Balls in Rotating Box</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+  }
+  #wrapper {
+    width: 400px;
+    height: 400px;
+    animation: spin 1s linear infinite; /* rotates 360deg per second */
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  canvas {
+    background: white;
+    border: 2px solid black;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div id="wrapper">
+<canvas id="box" width="400" height="400"></canvas>
+</div>
+<script>
+const canvas = document.getElementById('box');
+const ctx = canvas.getContext('2d');
+const balls = [];
+const numBalls = 3;
+const radius = 15;
+
+for (let i = 0; i < numBalls; i++) {
+  balls.push({
+    x: Math.random() * (canvas.width - 2 * radius) + radius,
+    y: Math.random() * (canvas.height - 2 * radius) + radius,
+    vx: (Math.random() * 2 - 1) * 200, // pixels per second
+    vy: (Math.random() * 2 - 1) * 200
+  });
+}
+
+let lastTime = null;
+function step(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const dt = (timestamp - lastTime) / 1000; // seconds
+  lastTime = timestamp;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let ball of balls) {
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+
+    // bounce off walls
+    if (ball.x - radius < 0 && ball.vx < 0) {
+      ball.x = radius;
+      ball.vx *= -1;
+    } else if (ball.x + radius > canvas.width && ball.vx > 0) {
+      ball.x = canvas.width - radius;
+      ball.vx *= -1;
+    }
+    if (ball.y - radius < 0 && ball.vy < 0) {
+      ball.y = radius;
+      ball.vy *= -1;
+    } else if (ball.y + radius > canvas.height && ball.vy > 0) {
+      ball.y = canvas.height - radius;
+      ball.vy *= -1;
+    }
+
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'steelblue';
+    ctx.fill();
+    ctx.stroke();
+  }
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+</script>
+</body>
+</html>
